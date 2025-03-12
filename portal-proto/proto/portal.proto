@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package portal;
+
+service Portal {
+    // Returns a directory tree rooted at the given path.
+    rpc ListDir(ListDirRequest) returns (DirTree) {}
+}
+
+message ListDirRequest {
+    string path = 1;
+}
+
+// Represents a directory tree.
+message DirTree {
+    repeated DirTreeItem roots = 1;
+}
+
+// Represents an item in a directory tree. Roots will have
+// children present, leaves will have no children.
+message DirTreeItem {
+    string path = 1;
+    repeated DirTreeItem children = 2;
+}
