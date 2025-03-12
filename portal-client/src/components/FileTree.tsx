@@ -5,7 +5,11 @@ import {
   DisclosureButton,
   DisclosurePanel,
 } from "@headlessui/react";
-import { ChevronRightIcon } from "@heroicons/react/20/solid";
+import {
+  DocumentIcon,
+  FolderIcon,
+  FolderOpenIcon,
+} from "@heroicons/react/24/outline";
 
 interface NavTree extends DirTree {
   roots: NavItem[];
@@ -77,10 +81,16 @@ function navItemNode(item: NavItem): JSX.Element {
         <button
           className={classNames(
             item.current ? "bg-gray-50" : "hover:bg-gray-50",
-            "block rounded-md py-2 pr-2 pl-10 text-sm/6 font-semibold text-gray-700 text-left w-full",
+            "block rounded-md py-2 pl-2 pr-2 text-sm/6 font-semibold text-gray-700 w-full",
           )}
         >
-          {item.path}
+          <span className="flex justify-start gap-x-2">
+            <DocumentIcon
+              aria-hidden="true"
+              className="size-5 shrink-0 text-gray-400"
+            />
+            {item.path}
+          </span>
         </button>
       ) : (
         <Disclosure as="div">
@@ -90,9 +100,13 @@ function navItemNode(item: NavItem): JSX.Element {
               "group flex w-full items-center gap-x-3 rounded-md p-2 text-left text-sm/6 font-semibold text-gray-700",
             )}
           >
-            <ChevronRightIcon
+            <FolderIcon
               aria-hidden="true"
-              className="size-5 shrink-0 text-gray-400 group-data-open:rotate-90 group-data-open:text-gray-500"
+              className="size-5 shrink-0 text-gray-400 group-data-open:hidden"
+            />
+            <FolderOpenIcon
+              aria-hidden="true"
+              className="hidden size-5 shrink-0 text-gray-500 group-data-open:inline"
             />
             {item.path}
           </DisclosureButton>
