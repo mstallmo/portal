@@ -1,7 +1,11 @@
-use anyhow::Result;
-use portal_proto::{DirTree, DirTreeItem, ListDirRequest, client::PortalClient};
+use std::fs;
 
-use tonic::Request;
+use anyhow::Result;
+use portal_proto::{
+    DirTree, DirTreeItem, ListDirRequest, OpenFileRequest, client::PortalClient,
+    file_content::Content,
+};
+use tonic::{Request, transport::Channel};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -16,6 +20,11 @@ async fn main() -> Result<()> {
     println!("RESPONSE = {:?}\n", response);
 
     print_dir_tree(response.get_ref());
+
+    let mut root = std::env!("CARGO_MANIFEST_DIR").to_string();
+    root.push_str("/Cargo.toml");
+
+    open_remote_file(&mut client, &root).await?;
 
     Ok(())
 }
@@ -45,4 +54,42 @@ fn print_tree_item(item: &DirTreeItem, parent: String) {
             print_tree_item(child, new_parent);
         }
     }
+}
+
+async fn open_remote_file(
+    client: &mut PortalClient<Channel>,
+    file_path: impl AsRef<str>,
+) -> Result<()> {
+    println!("Opening remote file: {}", file_path.as_ref());
+    let mut stream = client
+        .open_file(Request::new(OpenFileRequest {
+            path: file_path.as_ref().to_string(),
+        }))
+        .await?
+        .into_inner();
+
+    let mut file_buffer = Vec::new();
+    while let Some(content) = stream.message().await? {
+        if let Some(content) = content.content {
+            match content {
+                Content::Metadata(metadata) => {
+                    println!("Metadata: {:?}", metadata);
+                    file_buffer = Vec::with_capacity(metadata.size as usize);
+                }
+                Content::Data(mut data) => {
+                    println!("Got file bytes");
+                    file_buffer.append(&mut data);
+                }
+            }
+        }
+    }
+
+    if file_buffer.is_empty() {
+        println!("File had no data");
+    } else {
+        println!("Writing test_file.txt");
+        fs::write("test_file.txt", &file_buffer)?;
+    }
+
+    Ok(())
 }

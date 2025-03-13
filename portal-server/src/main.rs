@@ -1,12 +1,14 @@
 use anyhow::Result;
 use portal_proto::{
-    DirTree, DirTreeItem, ListDirRequest,
+    DirTree, DirTreeItem, FileContent, FileMetadata, ListDirRequest, OpenFileRequest, file_content,
     server::{Portal, PortalServer},
 };
 use std::{
     fs,
     path::{Path, PathBuf},
 };
+use tokio::{fs as tfs, io::AsyncReadExt, sync::mpsc};
+use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status, transport::Server};
 
 #[tokio::main]
@@ -39,6 +41,55 @@ impl Portal for PortalService {
         read_all(&path, &mut items).unwrap();
 
         Ok(Response::new(DirTree { roots: items }))
+    }
+
+    type OpenFileStream = ReceiverStream<Result<FileContent, Status>>;
+
+    async fn open_file(
+        &self,
+        request: Request<OpenFileRequest>,
+    ) -> Result<Response<Self::OpenFileStream>, Status> {
+        let file_path = request.into_inner().path;
+        println!("Opening file {file_path}");
+
+        let (tx, rx) = mpsc::channel(4);
+
+        // TODO: Implement error handling
+        tokio::spawn(async move {
+            let mut file = tfs::File::open(file_path).await.unwrap();
+            let file_size = file.metadata().await.unwrap().len();
+
+            let metadata = FileMetadata {
+                mime_type: "text/plain".to_string(),
+                size: file_size,
+            };
+
+            let content = FileContent {
+                content: Some(file_content::Content::Metadata(metadata)),
+            };
+
+            tx.send(Ok(content)).await.unwrap();
+
+            let mut chunk = vec![0; 1_024 * 1_024];
+            loop {
+                let bytes_read = file.read(&mut chunk).await.unwrap();
+                println!("Bytes read: {}", bytes_read);
+
+                if bytes_read == 0 {
+                    break;
+                }
+
+                chunk.truncate(bytes_read);
+
+                let content = FileContent {
+                    content: Some(file_content::Content::Data(chunk.clone())),
+                };
+
+                tx.send(Ok(content)).await.unwrap();
+            }
+        });
+
+        Ok(Response::new(ReceiverStream::new(rx)))
     }
 }
 
