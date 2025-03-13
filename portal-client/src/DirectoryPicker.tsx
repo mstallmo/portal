@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Dialog,
   DialogBackdrop,
@@ -8,12 +7,16 @@ import {
 import { FolderPlusIcon } from "@heroicons/react/16/solid";
 
 type DirectoryPickerProps = {
+  open: boolean;
+  setOpen: (open: boolean) => void;
   setRootDir: (dir: string) => void;
 };
 
-export default function DirectoryPicker({ setRootDir }: DirectoryPickerProps) {
-  const [open, setOpen] = useState(false);
-
+export default function DirectoryPicker({
+  open,
+  setOpen,
+  setRootDir,
+}: DirectoryPickerProps) {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -26,16 +29,7 @@ export default function DirectoryPicker({ setRootDir }: DirectoryPickerProps) {
   }
 
   return (
-    <div className="h-dvh">
-      <div className="px-4 sm:px-6 lg:px-8 min-h-full flex flex-col justify-center items-center">
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-        >
-          Open Directory
-        </button>
-      </div>
+    <div>
       <Dialog open={open} onClose={setOpen} className="relative z-10">
         <DialogBackdrop
           transition
@@ -46,14 +40,14 @@ export default function DirectoryPicker({ setRootDir }: DirectoryPickerProps) {
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
             <DialogPanel
               transition
-              className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+              className="relative transform overflow-hidden rounded-lg bg-zinc-900 px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
             >
               <form onSubmit={handleSubmit}>
                 <div>
                   <div className="text-center">
                     <DialogTitle
                       as="h3"
-                      className="text-base font-semibold text-gray-900"
+                      className="text-base font-semibold text-white"
                     >
                       Enter Directory to Open
                     </DialogTitle>
@@ -69,7 +63,7 @@ export default function DirectoryPicker({ setRootDir }: DirectoryPickerProps) {
                         name="directory"
                         type="text"
                         placeholder="~/Photos"
-                        className="col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pr-3 pl-10 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:pl-9 sm:text-sm/6"
+                        className="col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pr-3 pl-10 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-zinc-600 sm:pl-9 sm:text-sm/6"
                       />
                       <FolderPlusIcon
                         aria-hidden="true"
@@ -82,7 +76,7 @@ export default function DirectoryPicker({ setRootDir }: DirectoryPickerProps) {
                   <button
                     type="submit"
                     onClick={() => setOpen(false)}
-                    className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
+                    className="inline-flex w-full justify-center rounded-md bg-zinc-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-zinc-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-600 sm:col-start-2"
                   >
                     Open
                   </button>
@@ -90,7 +84,7 @@ export default function DirectoryPicker({ setRootDir }: DirectoryPickerProps) {
                     type="button"
                     data-autofocus
                     onClick={() => setOpen(false)}
-                    className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50 sm:col-start-1 sm:mt-0"
+                    className="mt-3 inline-flex w-full justify-center rounded-md bg-zinc-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-zinc-500 sm:col-start-1 sm:mt-0"
                   >
                     Cancel
                   </button>

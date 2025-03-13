@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { DirTree, DirTreeItem, isDir } from "../data/dirTree";
+import { DirTree, DirTreeItem, isDir } from "@/data/dirTree";
+import { classNames } from "@/utils";
 import {
   Disclosure,
   DisclosureButton,
@@ -35,10 +36,6 @@ function toNavTree(roots: DirTreeItem[]): NavTree {
   }
 
   return { roots: navRoots };
-}
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
 }
 
 interface FileTreeProps {
