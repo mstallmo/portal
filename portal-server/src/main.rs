@@ -60,7 +60,7 @@ impl Portal for PortalService {
             let file_size = file.metadata().await.unwrap().len();
 
             let metadata = FileMetadata {
-                mime_type: "text/plain".to_string(),
+                mime_type: "image/jpeg".to_string(),
                 size: file_size,
             };
 
@@ -108,8 +108,14 @@ fn read_all(path: impl AsRef<Path>, items: &mut Vec<DirTreeItem>) -> Result<()> 
                 items.push(item);
             }
         } else {
+            let path = entry.file_name().to_string_lossy().into_owned();
+
+            if path.starts_with(".") {
+                continue;
+            }
+
             let item = DirTreeItem {
-                path: entry.file_name().to_string_lossy().into_owned(),
+                path,
                 children: vec![],
             };
 

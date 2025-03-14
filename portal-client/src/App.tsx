@@ -6,11 +6,13 @@ import "./App.css";
 import DirectoryPicker from "./DirectoryPicker";
 import ImageViewer from "./ImageViewer";
 import Layout from "./Layout";
+import { FileContent } from "./portalClient";
 
 export default function App() {
   const [openDirectoryPicker, setOpenDirectoryPicker] = useState(false);
   const [rootDir, setRootDir] = useState<string>("");
   const [tree, setTree] = useState<DirTree>({ roots: [] });
+  const [imageData, setImageData] = useState<FileContent | null>(null);
 
   useEffect(() => {
     const fetchDirTree = async () => {
@@ -29,8 +31,9 @@ export default function App() {
       tree={tree}
       title={rootDir}
       setOpenDirectoryPicker={setOpenDirectoryPicker}
+      setImageData={setImageData}
     >
-      {isEmpty(rootDir) ? <></> : <ImageViewer />}
+      {isEmpty(rootDir) ? <></> : <ImageViewer content={imageData} />}
       <DirectoryPicker
         open={openDirectoryPicker}
         setOpen={setOpenDirectoryPicker}

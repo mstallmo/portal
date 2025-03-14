@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { classNames, isEmpty } from "@/utils";
 import { DirTree, DirTreeItem, isDir } from "@/data/dirTree";
+import { openFile, FileContent } from "./portalClient";
 import {
   Dropdown,
   DropdownButton,
@@ -67,6 +68,7 @@ type LayoutProps = {
   title: string;
   tree: DirTree;
   setOpenDirectoryPicker: (open: boolean) => void;
+  setImageData: (data: FileContent | null) => void;
   children: React.ReactNode;
 };
 
@@ -74,6 +76,7 @@ export default function Layout({
   tree,
   title,
   setOpenDirectoryPicker,
+  setImageData,
   children,
 }: LayoutProps) {
   const [navTree, setNavTree] = useState(toNavTree(tree.roots));
@@ -123,7 +126,9 @@ export default function Layout({
           <SidebarBody>
             <SidebarSection>
               <ul role="list" className="space-y-1">
-                {navTree.roots.map((item) => navItemNode(item))}
+                {navTree.roots.map((item) =>
+                  navItemNode(item, setImageData, title),
+                )}
               </ul>
             </SidebarSection>
             <SidebarSpacer />
@@ -142,7 +147,17 @@ export default function Layout({
   );
 }
 
-function navItemNode(item: NavItem): JSX.Element {
+function navItemNode(
+  item: NavItem,
+  setImageData: (data: FileContent | null) => void,
+  parentPath?: string,
+): JSX.Element {
+  async function handleFileClick(path: string) {
+    const fileContent = await openFile(path);
+
+    setImageData(fileContent);
+  }
+
   return (
     <li key={item.path}>
       {!isDir(item) ? (
@@ -151,6 +166,10 @@ function navItemNode(item: NavItem): JSX.Element {
             item.current ? "bg-gray-50" : "hover:bg-zinc-900",
             "block rounded-md py-2 pl-2 pr-2 text-sm/6 font-semibold text-white w-full",
           )}
+          onClick={() => {
+            const path = parentPath ? `${parentPath}/${item.path}` : item.path;
+            handleFileClick(path);
+          }}
         >
           <span className="flex justify-start gap-x-2">
             <DocumentIcon
@@ -179,7 +198,12 @@ function navItemNode(item: NavItem): JSX.Element {
             {item.path}
           </DisclosureButton>
           <DisclosurePanel as="ul" className="mt-1 px-2">
-            {item.children.map((subItem) => navItemNode(subItem as NavItem))}
+            {item.children.map((subItem) => {
+              const path = parentPath
+                ? `${parentPath}/${item.path}`
+                : item.path;
+              return navItemNode(subItem as NavItem, setImageData, path);
+            })}
           </DisclosurePanel>
         </Disclosure>
       )}
