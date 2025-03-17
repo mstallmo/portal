@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { classNames, isEmpty } from "@/utils";
-import { DirTree, DirTreeItem, isDir } from "@/data/dirTree";
+import { isDir, NavTree, NavItem } from "@/data/dirTree";
 import { openFile, FileContent } from "@/portalClient";
+import { useDirectoryHistory } from "@/hooks/directory";
 import {
   Dropdown,
   DropdownButton,
@@ -37,62 +38,26 @@ import {
   DisclosureButton,
   DisclosurePanel,
 } from "@headlessui/react";
-
-interface NavTree extends DirTree {
-  roots: NavItem[];
-}
-
-interface NavItem extends DirTreeItem {
-  current: boolean;
-}
-
-function toNavTree(roots: DirTreeItem[]): NavTree {
-  const navRoots: NavItem[] = [];
-
-  for (const item of roots) {
-    if (isDir(item)) {
-      navRoots.push({
-        ...item,
-        children: toNavTree(item.children).roots,
-        current: false,
-      });
-    } else {
-      navRoots.push({ ...item, current: false });
-    }
-  }
-
-  return { roots: navRoots };
-}
+import { addDirToHistory, getHistory } from "@/data/dirHistory";
 
 type LayoutProps = {
-  title: string;
-  tree: DirTree;
+  currentDirectory: string;
+  navTree: NavTree;
   setOpenDirectoryPicker: (open: boolean) => void;
-  setRootDir: (dir: string) => void;
+  setCurrentDirectory: (dir: string) => void;
   setImageData: (data: FileContent | null) => void;
   children: React.ReactNode;
 };
 
 export default function Layout({
-  title,
-  tree,
+  currentDirectory,
+  navTree,
   setOpenDirectoryPicker,
-  setRootDir,
+  setCurrentDirectory,
   setImageData,
   children,
 }: LayoutProps) {
-  const [navTree, setNavTree] = useState(toNavTree(tree.roots));
-  const [dirHistoryItems, setDirHistoryItems] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (title.length > 0 && !dirHistoryItems.includes(title)) {
-      setDirHistoryItems([...dirHistoryItems, title]);
-    }
-  }, [title]);
-
-  useEffect(() => {
-    setNavTree(toNavTree(tree.roots));
-  }, [tree]);
+  const { dirHistoryItems } = useDirectoryHistory(currentDirectory);
 
   return (
     <SidebarLayout
@@ -104,10 +69,12 @@ export default function Layout({
               <DropdownButton as={SidebarItem} className="lg:mb-2.5">
                 <SidebarLabel
                   className={classNames(
-                    isEmpty(title) ? "text-gray-400" : "text-white",
+                    isEmpty(currentDirectory) ? "text-gray-400" : "text-white",
                   )}
                 >
-                  {isEmpty(title) ? "Select a Directory..." : title}
+                  {isEmpty(currentDirectory)
+                    ? "Select a Directory..."
+                    : currentDirectory}
                 </SidebarLabel>
                 <ChevronDownIcon />
               </DropdownButton>
@@ -120,7 +87,7 @@ export default function Layout({
                   <DropdownLabel>Settings</DropdownLabel>
                 </DropdownItem>
                 <DropdownDivider />
-                {historyItems(dirHistoryItems, setRootDir)}
+                {historyItems(dirHistoryItems, setCurrentDirectory)}
                 <DropdownDivider />
                 <DropdownItem onClick={() => setOpenDirectoryPicker(true)}>
                   <PlusIcon />
@@ -133,7 +100,7 @@ export default function Layout({
             <SidebarSection>
               <ul role="list" className="space-y-1">
                 {navTree.roots.map((item) =>
-                  navItemNode(item, setImageData, title),
+                  navItemNode(item, setImageData, currentDirectory),
                 )}
               </ul>
             </SidebarSection>
@@ -155,11 +122,14 @@ export default function Layout({
 
 function historyItems(
   dirHistoryItems: string[],
-  setRootDir: (dir: string) => void,
+  setCurrentDirectory: (dir: string) => void,
 ): JSX.Element[] {
   return dirHistoryItems.map((item, idx) => {
     return (
-      <DropdownItem key={`history-${idx}`} onClick={() => setRootDir(item)}>
+      <DropdownItem
+        key={`history-${idx}`}
+        onClick={() => setCurrentDirectory(item)}
+      >
         <FolderIconSmall />
         <DropdownLabel>{item}</DropdownLabel>
       </DropdownItem>

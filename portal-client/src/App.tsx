@@ -1,44 +1,35 @@
-import { useState, useEffect } from "react";
-import { DirTree } from "./data/dirTree";
-import { listDir } from "./portalClient";
-import { isEmpty } from "./utils";
-import "./App.css";
-import DirectoryPicker from "./DirectoryPicker";
-import ImageViewer from "./ImageViewer";
-import Layout from "./Layout";
-import { FileContent } from "./portalClient";
+import { useEffect, useState } from "react";
+import { isEmpty } from "@/utils";
+import "@/App.css";
+import DirectoryPicker from "@/DirectoryPicker";
+import ImageViewer from "@/ImageViewer";
+import Layout from "@/Layout";
+import { FileContent } from "@/portalClient";
+import { useDirectory } from "@/hooks/directory";
 
 export default function App() {
   const [openDirectoryPicker, setOpenDirectoryPicker] = useState(false);
-  const [rootDir, setRootDir] = useState<string>("");
-  const [tree, setTree] = useState<DirTree>({ roots: [] });
   const [imageData, setImageData] = useState<FileContent | null>(null);
+  const { currentDirectory, setCurrentDirectory, navTree } = useDirectory();
 
+  // Clear image data when current directory changes
   useEffect(() => {
-    const fetchDirTree = async () => {
-      if (rootDir.length > 0) {
-        const dirTree = await listDir(rootDir);
-
-        setTree(dirTree);
-      }
-    };
-
-    fetchDirTree();
-  }, [rootDir]);
+    setImageData(null);
+  }, [currentDirectory]);
 
   return (
     <Layout
-      tree={tree}
-      title={rootDir}
+      currentDirectory={currentDirectory}
+      navTree={navTree}
+      setCurrentDirectory={setCurrentDirectory}
       setOpenDirectoryPicker={setOpenDirectoryPicker}
-      setRootDir={setRootDir}
       setImageData={setImageData}
     >
-      {isEmpty(rootDir) ? <></> : <ImageViewer content={imageData} />}
+      {isEmpty(currentDirectory) ? <></> : <ImageViewer content={imageData} />}
       <DirectoryPicker
         open={openDirectoryPicker}
         setOpen={setOpenDirectoryPicker}
-        setRootDir={setRootDir}
+        setCurrentDirectory={setCurrentDirectory}
       />
     </Layout>
   );

@@ -9,13 +9,13 @@ import { FolderPlusIcon } from "@heroicons/react/16/solid";
 type DirectoryPickerProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  setRootDir: (dir: string) => void;
+  setCurrentDirectory: (dir: string) => void;
 };
 
 export default function DirectoryPicker({
   open,
   setOpen,
-  setRootDir,
+  setCurrentDirectory,
 }: DirectoryPickerProps) {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,7 +24,7 @@ export default function DirectoryPicker({
     const dirToOpen = formData.get("directory");
 
     if (dirToOpen) {
-      setRootDir(dirToOpen as string);
+      setCurrentDirectory(dirToOpen as string);
     }
   }
 
