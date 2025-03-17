@@ -8,7 +8,6 @@ type ImageDataProps = {
 export default function ImageViewer({ content }: ImageDataProps) {
   const image = useMemo(() => {
     if (content) {
-      console.log(content);
       const blob = new Blob([content.data], { type: content.header.mimeType });
       return URL.createObjectURL(blob);
     }

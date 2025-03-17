@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { classNames, isEmpty } from "@/utils";
 import { DirTree, DirTreeItem, isDir } from "@/data/dirTree";
-import { openFile, FileContent } from "./portalClient";
+import { openFile, FileContent } from "@/portalClient";
 import {
   Dropdown,
   DropdownButton,
@@ -68,18 +68,27 @@ type LayoutProps = {
   title: string;
   tree: DirTree;
   setOpenDirectoryPicker: (open: boolean) => void;
+  setRootDir: (dir: string) => void;
   setImageData: (data: FileContent | null) => void;
   children: React.ReactNode;
 };
 
 export default function Layout({
-  tree,
   title,
+  tree,
   setOpenDirectoryPicker,
+  setRootDir,
   setImageData,
   children,
 }: LayoutProps) {
   const [navTree, setNavTree] = useState(toNavTree(tree.roots));
+  const [dirHistoryItems, setDirHistoryItems] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (title.length > 0 && !dirHistoryItems.includes(title)) {
+      setDirHistoryItems([...dirHistoryItems, title]);
+    }
+  }, [title]);
 
   useEffect(() => {
     setNavTree(toNavTree(tree.roots));
@@ -111,10 +120,7 @@ export default function Layout({
                   <DropdownLabel>Settings</DropdownLabel>
                 </DropdownItem>
                 <DropdownDivider />
-                <DropdownItem onClick={() => setOpenDirectoryPicker(true)}>
-                  <FolderIconSmall />
-                  <DropdownLabel>History placeholder&hellip;</DropdownLabel>
-                </DropdownItem>
+                {historyItems(dirHistoryItems, setRootDir)}
                 <DropdownDivider />
                 <DropdownItem onClick={() => setOpenDirectoryPicker(true)}>
                   <PlusIcon />
@@ -145,6 +151,20 @@ export default function Layout({
       {children}
     </SidebarLayout>
   );
+}
+
+function historyItems(
+  dirHistoryItems: string[],
+  setRootDir: (dir: string) => void,
+): JSX.Element[] {
+  return dirHistoryItems.map((item, idx) => {
+    return (
+      <DropdownItem key={`history-${idx}`} onClick={() => setRootDir(item)}>
+        <FolderIconSmall />
+        <DropdownLabel>{item}</DropdownLabel>
+      </DropdownItem>
+    );
+  });
 }
 
 function navItemNode(

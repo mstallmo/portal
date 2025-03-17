@@ -6,7 +6,7 @@ const textDecoder = new TextDecoder();
  * Parses a raw ArrayBuffer into a FileContent object using a custom binary protocol.
  * This protocol enables JSON serialized data and binary data to be passed in the same buffer.
  *
- * The protocl follows a simple <header size><header><content> structure. The first 8 bytes are the size of the
+ * The protocol follows a simple <header size><header><content> structure. The first 8 bytes are the size of the
  * header as a u64. The next bytes from 8 to header length are the header itself as a JSON serialized string.
  * The remaining bytes from 8 + header length to the end of the buffer are the content itself.
  *

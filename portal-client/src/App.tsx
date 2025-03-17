@@ -31,6 +31,7 @@ export default function App() {
       tree={tree}
       title={rootDir}
       setOpenDirectoryPicker={setOpenDirectoryPicker}
+      setRootDir={setRootDir}
       setImageData={setImageData}
     >
       {isEmpty(rootDir) ? <></> : <ImageViewer content={imageData} />}
