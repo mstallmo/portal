@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package portal;
+
+service Portal {
+    // Returns a directory tree rooted at the given path.
+    rpc ListDir(ListDirRequest) returns (DirTree) {}
+
+    // Opens the requestd file and sends back the contents in a stream
+    rpc OpenFile(OpenFileRequest) returns (stream FileContent) {}
+}
+
+message ListDirRequest {
+    string path = 1;
+}
+
+// Represents a directory tree.
+message DirTree {
+    repeated DirTreeItem roots = 1;
+}
+
+// Represents an item in a directory tree. Roots will have
+// children present, leaves will have no children.
+message DirTreeItem {
+    string path = 1;
+    repeated DirTreeItem children = 2;
+}
+
+message OpenFileRequest {
+    // Absolute path to the file to open.
+    string path = 1;
+}
+
+// Content of the file being opened. Content can either be metadata about the file or the file's contents.
+// The metadata message should come first in the stream and then the data messages following. Data messages
+// are chunked into 1MB each.
+message FileContent {
+    oneof content {
+        // Metadata about the file. This message should come first in the stream.
+        FileMetadata metadata = 1;
+        // Bytes of the file being read in one Megabyte chunks.
+        bytes data = 2;
+    }
+}
+
+message FileMetadata {
+    // Mime type of the file. See https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types for possible types.
+    string mimeType = 1;
+    // Total size of files in bytes
+    uint64 size = 2;
+}

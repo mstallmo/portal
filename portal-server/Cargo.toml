@@ -1,0 +1,15 @@
+[package]
+name = "portal-server"
+version = "0.1.0"
+edition = "2024"
+default-run = "portal-server"
+
+[dependencies]
+anyhow = { workspace = true }
+portal_proto = { path = "../portal-proto" }
+prost = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tokio-stream = "0.1.17"
+tonic = { workspace = true }
