@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { classNames, isEmpty } from "@/utils";
 import { isDir, NavTree, NavItem } from "@/data/dirTree";
 import { openFile, FileContent } from "@/portalClient";
@@ -38,7 +37,6 @@ import {
   DisclosureButton,
   DisclosurePanel,
 } from "@headlessui/react";
-import { addDirToHistory, getHistory } from "@/data/dirHistory";
 
 type LayoutProps = {
   currentDirectory: string;
